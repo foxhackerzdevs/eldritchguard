@@ -1,0 +1,9 @@
+[package]
+name = "eldritchguard"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.28"
+regex = "1"
+unicode-normalization = "0.1"
