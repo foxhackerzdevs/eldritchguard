@@ -19,7 +19,7 @@ SYSTEM CORRUPTION DETECTED. PURGING MEMORY CORES...
 
 ## Measured detection rate
 
-Verified against a 27-payload labeled test suite (`tests/test_payloads.py`, `tests/run_harness.py`) covering exact-phrase jailbreaks, paraphrased/obfuscated jailbreaks, homoglyph and leetspeak evasion, benign high-entropy structured data (JWT/UUID/hash/hex/base64), and normal prose/log lines:
+Verified against a 29-payload labeled test suite (`tests/test_payloads.py`, `tests/run_harness.py`) covering exact-phrase jailbreaks, paraphrased/obfuscated jailbreaks, homoglyph and leetspeak evasion, invisible-character injection, benign high-entropy structured data (JWT/UUID/hash/hex/base64), and normal prose/log lines:
 
 | | Result |
 |---|---|

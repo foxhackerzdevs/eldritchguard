@@ -1,9 +1,9 @@
-use std::io::{self, BufRead};
 use crossterm::{
     execute,
     style::{Color, Print, ResetColor, SetForegroundColor},
 };
 use regex::Regex;
+use std::io::{self, BufRead};
 use unicode_normalization::UnicodeNormalization;
 
 pub enum ContainmentStatus {
@@ -32,7 +32,8 @@ impl GuardrailEngine {
 
         let structured_exemptions = vec![
             Regex::new(r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$").unwrap(),
-            Regex::new(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap(),
+            Regex::new(r"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+                .unwrap(),
             Regex::new(r"(?i)^[0-9a-f]{32,}$").unwrap(),
             Regex::new(r"^[A-Za-z0-9+/_-]{40,}={0,2}$").unwrap(),
         ];
@@ -45,7 +46,28 @@ impl GuardrailEngine {
     }
 
     fn normalize_for_matching(input: &str) -> String {
-        let nfkc: String = input.nfkc().collect();
+        // Strip zero-width and other invisible formatting characters before
+        // anything else. These have no legitimate role in plain-text
+        // pattern matching for this tool, and are a known evasion
+        // technique: inserting one mid-word (e.g. "ign\u{200B}ore")
+        // defeats literal substring matching in the regexes below without
+        // changing how the text renders or reads to a human or to an LLM.
+        let stripped: String = input
+            .chars()
+            .filter(|c| {
+                !matches!(
+                    *c,
+                    '\u{00AD}'  // soft hyphen
+                    | '\u{200B}' // zero-width space
+                    | '\u{200C}' // zero-width non-joiner
+                    | '\u{200D}' // zero-width joiner
+                    | '\u{2060}' // word joiner
+                    | '\u{FEFF}' // zero-width no-break space / BOM
+                )
+            })
+            .collect();
+
+        let nfkc: String = stripped.nfkc().collect();
         let mut s = nfkc
             .replace('\u{0455}', "s")
             .replace('\u{0456}', "i")
